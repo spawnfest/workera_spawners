@@ -18,6 +18,7 @@ defmodule WorkeraSpawnersWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/counter", CounterLive
   end
 
   # Other scopes may use custom stacks.

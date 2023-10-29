@@ -24,12 +24,12 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
           <%= submit "Submit" %>
         <% end %>
       <% :awaiting_players -> %>
-        <!-- Waiting for server event... -->
+        <%= "Waiting for another player..." %>
       <% :finished -> %>
         <!-- Finished game... -->
       <% _ -> %>
         <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
-          <label><%= @question %></label>
+          <label><%= @question.text %></label>
           <%= text_input f, :answer, placeholder: "Enter your answer" %>
           <%= submit "Submit" %>
         <% end %>
@@ -38,15 +38,16 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
   end
 
   def handle_event("save_name", %{"name_form" => %{"name" => name}}, socket) do
-    {:noreply, assign(socket, :name, name)}
+    GameServer.add_player(name)
+    {:noreply, assign(socket, %{name: name, game_state: :awaiting_players})}
   end
 
   def handle_event("save_answer", %{"question_form" => %{"answer" => _answer}}, socket) do
-    # Handle answer submission
+
     {:noreply, socket}
   end
 
-  def handle_info({:question, question}, state, socket) do
-    {:noreply, assign(socket, %{game_state: state, question: question})}
+  def handle_info({:question, question}, socket) do
+    {:noreply, assign(socket, %{question: question, game_state: :awaiting_answers})}
   end
 end

@@ -15,9 +15,10 @@ defmodule WorkeraSpawners.Application do
       # Start Finch
       {Finch, name: WorkeraSpawners.Finch},
       # Start the Endpoint (http/https)
-      WorkeraSpawnersWeb.Endpoint
+      WorkeraSpawnersWeb.Endpoint,
       # Start a worker by calling: WorkeraSpawners.Worker.start_link(arg)
       # {WorkeraSpawners.Worker, arg}
+      WorkeraSpawners.GameServer
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

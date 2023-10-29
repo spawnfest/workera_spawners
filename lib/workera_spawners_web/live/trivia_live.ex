@@ -37,7 +37,7 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
     """
   end
 
-  def handle_event("save_name", %{"name_form" => %{"name" => name}}, %{assigns: %{server: s}} = socket) do
+  def handle_event("save_name", %{"name_form" => %{"name" => name}}, socket) do
     {:noreply, assign(socket, :name, name)}
   end
 

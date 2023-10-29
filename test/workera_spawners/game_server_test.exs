@@ -1,10 +1,10 @@
 defmodule WorkeraSpawners.GameServerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias WorkeraSpawners.GameServer
 
   setup do
-    start_supervised!(WorkeraSpawners.GameServer)
+    WorkeraSpawners.GameServer.restart()
     :ok
   end
 

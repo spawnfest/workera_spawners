@@ -12,6 +12,10 @@ defmodule WorkeraSpawners.GameServer do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
+  def restart() do
+    GenServer.call(__MODULE__, :restart)
+  end
+
   def get_game_state() do
     GenServer.call(__MODULE__, :get_game_state)
   end
@@ -31,6 +35,11 @@ defmodule WorkeraSpawners.GameServer do
   @impl true
   def init(:ok) do
     {:ok, %State{game_state: :awaiting_players}}
+  end
+
+  @impl true
+  def handle_call(:restart, _from, _state) do
+    {:reply, :ok, %State{game_state: :awaiting_players}}
   end
 
   @impl true

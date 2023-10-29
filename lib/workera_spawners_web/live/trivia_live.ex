@@ -4,12 +4,10 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
   alias WorkeraSpawners.GameServer
 
   def mount(_params, _session, socket) do
-    server = GameServer.start_link(__MODULE__)
     {
       :ok,
       socket
       |> assign(
-      server: server,
       game_state: :awaiting_name,
       name: nil,
       question: nil

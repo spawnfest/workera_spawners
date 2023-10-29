@@ -25,22 +25,27 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
             <%= submit "Submit" %>
           <% end %>
         <% {_, nil} -> %>
-          <p> Game going on, please wait </p>
+          <p class="message error"> Game going on, please wait </p>
         <% {:awaiting_players, _name} -> %>
-          <p>Waiting for other players!</p>
+          <p class="message waiting">Waiting for other players!</p>
         <% {:awaiting_next_question, _name} -> %>
-          <%= "Nice job!" %>
+          <p class="message success"> Nice job! </p>
         <% {:finished, _name} -> %>
           <%= case @result do %>
             <% :you_won -> %>
-              <%= "You won!" %>
+              <p class="message success"> You won! </p>
+              <br/>
             <% :you_lost -> %>
-              <%= "You lost!" %>
+              <p class="message waiting"> You Lost! </p>
+              <br/>
             <% :draw -> %>
-              <%= "It's a draw!" %>
+            <p class="message success"> It's a draw! </p>
+              <br/>
           <% end %>
           <%= "Your score: #{@my_score}" %>
+          <br/>
           <%= "Opponent's score: #{@opp_score}" %>
+          <br/>
           <button phx-click="restart">Restart</button>
         <% {:awaiting_answers, _name} -> %>
           <%= case @question do %>
@@ -49,8 +54,8 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
             <% _ -> %>
               <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
                 <label><%= @question.text %></label>
-                <%= text_input f, :answer, placeholder: "Enter your answer" %>
-                <%= submit "Submit" %>
+                <%= text_input f, :answer, placeholder: "Enter your answer", type: "text" %>
+                <%= submit "Submit", type: "submit" %>
               <% end %>
             <% end %>
         <% end %>

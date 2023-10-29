@@ -47,7 +47,10 @@ defmodule WorkeraSpawners.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:timex, "~> 3.7"}
+      {:timex, "~> 3.7"},
+      {:nx, "~> 0.6.2"},
+      {:exla, "~> 0.6.1"},
+      {:bumblebee, "~> 0.4.2"}
     ]
   end
 

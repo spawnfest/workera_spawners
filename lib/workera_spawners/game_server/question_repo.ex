@@ -8,6 +8,8 @@ defmodule WorkeraSpawners.GameServer.QuestionRepo do
   ]
 
   def get_random_question() do
-    Enum.random(@questions)
+    @questions
+    |> Enum.random()
+    |> Map.put(:asked_at, Timex.now())
   end
 end

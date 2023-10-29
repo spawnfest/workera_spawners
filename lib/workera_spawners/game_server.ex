@@ -77,9 +77,19 @@ defmodule WorkeraSpawners.GameServer do
   @impl true
   def handle_call({:answer, answer}, {pid, _}, state) do
     if answer == Map.get(List.first(state.questions), :answer) do
+      time_elapsed =
+        Timex.diff(
+          Timex.now(),
+          Map.get(List.first(state.questions), :asked_at),
+          :millisecond
+        )
+
+      points =
+        round((state.answer_time - time_elapsed) / 1000)
+
       players =
         Enum.map(state.players, fn
-          %{pid: ^pid} = player -> %{player | score: player.score + 1}
+          %{pid: ^pid} = player -> %{player | score: player.score + points}
           player -> player
         end)
 

@@ -26,7 +26,16 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
       <% :awaiting_players -> %>
         <%= "Waiting for another player..." %>
       <% :finished -> %>
-        <!-- Finished game... -->
+        <%= case @result do %>
+          <% :you_won -> %>
+            <%= "You won!" %>
+          <% :you_lost -> %>
+            <%= "You lost!" %>
+          <% :draw -> %>
+            <%= "It's a draw!" %>
+        <% end %>
+        <%= "Your score: #{@my_score}" %>
+        <%= "Opponent's score: #{@opp_score}" %>
       <% _ -> %>
         <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
           <label><%= @question.text %></label>
@@ -42,12 +51,23 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
     {:noreply, assign(socket, %{name: name, game_state: :awaiting_players})}
   end
 
-  def handle_event("save_answer", %{"question_form" => %{"answer" => _answer}}, socket) do
-
+  def handle_event("save_answer", %{"question_form" => %{"answer" => answer}}, socket) do
+    GameServer.answer(answer)
     {:noreply, socket}
   end
 
   def handle_info({:question, question}, socket) do
     {:noreply, assign(socket, %{question: question, game_state: :awaiting_answers})}
+  end
+
+  def handle_info({:finished, players}, socket) do
+    my_score = Enum.find(players, nil, & &1.name == socket.assigns.name).score
+    opp_score = Enum.find(players, nil, & &1.name != socket.assigns.name).score
+    result = cond do
+      my_score > opp_score -> :you_won
+      my_score < opp_score -> :you_lost
+      true -> :draw
+    end
+    {:noreply, assign(socket, %{my_score: my_score, result: result, opp_score: opp_score, game_state: :finished})}
   end
 end

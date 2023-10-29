@@ -117,4 +117,29 @@ defmodule WorkeraSpawners.GameServerTest do
       assert_receive({:question, _})
     end
   end
+
+  describe "stop after 3 questions" do
+    test "both players receive all 3 questions and then the game stops" do
+      GameServer.change_answer_time(50)
+      :ok = GameServer.add_player("John Doe")
+      :ok = GameServer.add_player("Michael Mustermann")
+
+      assert_receive({:question, _})
+      assert_receive({:question, _})
+
+      :timer.sleep(100)
+
+      assert_receive({:question, _})
+      assert_receive({:question, _})
+
+      :timer.sleep(100)
+
+      assert_receive({:question, _})
+      assert_receive({:question, _})
+
+      :timer.sleep(100)
+
+      assert GameServer.get_game_state() == :finished
+    end
+  end
 end

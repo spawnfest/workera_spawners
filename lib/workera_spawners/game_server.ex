@@ -76,7 +76,7 @@ defmodule WorkeraSpawners.GameServer do
 
   @impl true
   def handle_call({:answer, answer}, {pid, _}, state) do
-    if answer == state.question.answer do
+    if answer == Map.get(List.first(state.questions), :answer) do
       players =
         Enum.map(state.players, fn
           %{pid: ^pid} = player -> %{player | score: player.score + 1}
@@ -96,6 +96,11 @@ defmodule WorkeraSpawners.GameServer do
     {:reply, player.score, state}
   end
 
+  def handle_info(:generate_question, %State{question_amount: qa, questions: questions} = state)
+      when qa <= length(questions) do
+    {:noreply, %{state | game_state: :finished}}
+  end
+
   @impl true
   def handle_info(:generate_question, state) do
     question = QuestionRepo.get_random_question()
@@ -107,6 +112,6 @@ defmodule WorkeraSpawners.GameServer do
     # Generate next question after the answer time is over
     Process.send_after(self(), :generate_question, state.answer_time)
 
-    {:noreply, %{state | game_state: :awaiting_answers, question: question}}
+    {:noreply, %{state | game_state: :awaiting_answers, questions: [question | state.questions]}}
   end
 end

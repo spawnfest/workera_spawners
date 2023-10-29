@@ -42,8 +42,8 @@ defmodule WorkeraSpawners.GameServerTest do
       :ok = GameServer.add_player("John Doe")
       :ok = GameServer.add_player("Michael Mustermann")
 
-      assert_received({:question, _})
-      assert_received({:question, _})
+      assert_receive({:question, _})
+      assert_receive({:question, _})
     end
   end
 
@@ -89,7 +89,7 @@ defmodule WorkeraSpawners.GameServerTest do
 
       :correct = GameServer.answer(question.answer)
 
-      assert GameServer.get_score() == 1
+      assert GameServer.get_score() == 30
     end
 
     test "score after an incorrect answer" do
@@ -100,6 +100,22 @@ defmodule WorkeraSpawners.GameServerTest do
 
       assert GameServer.get_score() == 0
     end
+
+    test "score after a correct answer with waiting time" do
+      :ok = GameServer.add_player("John Doe")
+      :ok = GameServer.add_player("Michael Mustermann")
+
+      question =
+        receive do
+          {:question, question} -> question
+        end
+
+      :timer.sleep(2000)
+
+      :correct = GameServer.answer(question.answer)
+
+      assert GameServer.get_score() == 28
+    end
   end
 
   describe "receive second question" do
@@ -108,13 +124,13 @@ defmodule WorkeraSpawners.GameServerTest do
       :ok = GameServer.add_player("John Doe")
       :ok = GameServer.add_player("Michael Mustermann")
 
-      assert_received({:question, _})
-      assert_received({:question, _})
+      assert_receive({:question, _})
+      assert_receive({:question, _})
 
       :timer.sleep(100)
 
-      assert_received({:question, _})
-      assert_received({:question, _})
+      assert_receive({:question, _})
+      assert_receive({:question, _})
     end
   end
 
@@ -127,7 +143,7 @@ defmodule WorkeraSpawners.GameServerTest do
       :timer.sleep(300)
 
       assert GameServer.get_game_state() == :finished
-      assert_received({:finished, _})
+      assert_receive({:finished, _})
     end
   end
 end

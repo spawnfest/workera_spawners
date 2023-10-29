@@ -1,3 +1,3 @@
 defmodule WorkeraSpawners.GameServer.Question do
-  defstruct text: "", answer: ""
+  defstruct text: "", answer: "", asked_at: nil
 end

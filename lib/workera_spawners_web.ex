@@ -83,6 +83,8 @@ defmodule WorkeraSpawnersWeb do
     quote do
       # HTML escaping functionality
       import Phoenix.HTML
+      # HTML form functionality
+      import Phoenix.HTML.Form
       # Core UI components and translation
       import WorkeraSpawnersWeb.CoreComponents
       import WorkeraSpawnersWeb.Gettext

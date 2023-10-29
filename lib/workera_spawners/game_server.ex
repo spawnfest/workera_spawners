@@ -20,6 +20,10 @@ defmodule WorkeraSpawners.GameServer do
     GenServer.call(__MODULE__, :get_game_state)
   end
 
+  def change_answer_time(answer_time) do
+    GenServer.call(__MODULE__, {:change_answer_time, answer_time})
+  end
+
   def add_player(name) do
     GenServer.call(__MODULE__, {:add_player, name})
   end
@@ -45,6 +49,11 @@ defmodule WorkeraSpawners.GameServer do
   @impl true
   def handle_call(:get_game_state, _from, state) do
     {:reply, state.game_state, state}
+  end
+
+  @impl true
+  def handle_call({:change_answer_time, new_answer_time}, _from, state) do
+    {:reply, :ok, %{state | answer_time: new_answer_time}}
   end
 
   @impl true
@@ -95,7 +104,9 @@ defmodule WorkeraSpawners.GameServer do
       send(pid, {:question, question})
     end)
 
-    state = %{state | game_state: :awaiting_answers, question: question}
-    {:noreply, state}
+    # Generate next question after the answer time is over
+    Process.send_after(self(), :generate_question, state.answer_time)
+
+    {:noreply, %{state | game_state: :awaiting_answers, question: question}}
   end
 end

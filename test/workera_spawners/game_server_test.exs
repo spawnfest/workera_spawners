@@ -101,4 +101,20 @@ defmodule WorkeraSpawners.GameServerTest do
       assert GameServer.get_score() == 0
     end
   end
+
+  describe "receive second question" do
+    test "both players receive second question" do
+      GameServer.change_answer_time(50)
+      :ok = GameServer.add_player("John Doe")
+      :ok = GameServer.add_player("Michael Mustermann")
+
+      assert_receive({:question, _})
+      assert_receive({:question, _})
+
+      :timer.sleep(100)
+
+      assert_receive({:question, _})
+      assert_receive({:question, _})
+    end
+  end
 end

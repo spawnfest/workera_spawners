@@ -10,20 +10,27 @@ defmodule WorkeraSpawners.GameServer.QuestionRepo do
   def get_random_question() do
     Nx.default_backend(EXLA.Backend)
 
-    {:ok, model} = Bumblebee.load_model({:hf, "OpenAssistant/oasst-sft-1-pythia-12b"})
-    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, "OpenAssistant/oasst-sft-1-pythia-12b"})
-    serving = Bumblebee.Text.generation(model, tokenizer, defn_options: [compiler: EXLA])
+    {:ok, model} = Bumblebee.load_model({:hf, "google/flan-t5-xl"})
+    {:ok, tokenizer} = Bumblebee.load_tokenizer({:hf, "google/flan-t5-xl"})
 
-    question =
-      Nx.Serving.run(
-        serving,
-        "<|prompter|>Generate a trivia question which can be answered in one word.<|endoftext|><|assistant|>"
+    {:ok, generation_config} =
+      Bumblebee.load_generation_config({:hf, "google/flan-t5-xl"})
+
+    serving =
+      Bumblebee.Text.generation(model, tokenizer, generation_config,
+        defn_options: [compiler: EXLA]
       )
 
-    answer =
+    %{results: [%{text: question}]} =
       Nx.Serving.run(
         serving,
-        "<|prompter|>What is the one-word answer to the question \"#{question}\"?<|endoftext|><|assistant|>"
+        "Generate a trivia question which can be answered in one word"
+      )
+
+    %{results: [%{text: answer}]} =
+      Nx.Serving.run(
+        serving,
+        "What is the one-word answer to the question \"#{question}\"?"
       )
 
     %Question{text: question, answer: answer, asked_at: Timex.now()}

@@ -22,6 +22,8 @@ Trivia Duel aims to be more than just another trivia game; we aspire to revoluti
 
 - Play Against the Machine: Think you're a trivia champion? Test your mettle against our AI, which will not only pose questions but also play against you!
 
-- Social Features: Challenge friends, join tournaments, and participate in global trivia events.
+### Social Features:
+Challenge friends, join tournaments, and participate in global trivia events.
 
-- Learning Mode: For those who play to learn, get detailed explanations on answers, and delve deep into the topics you're curious about.
+### Learning Mode:
+For those who play to learn, get detailed explanations on answers, and delve deep into the topics you're curious about.

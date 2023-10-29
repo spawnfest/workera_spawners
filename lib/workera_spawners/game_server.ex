@@ -98,6 +98,10 @@ defmodule WorkeraSpawners.GameServer do
 
   def handle_info(:generate_question, %State{question_amount: qa, questions: questions} = state)
       when qa <= length(questions) do
+    Enum.each(state.players, fn %{pid: pid} ->
+      send(pid, {:finished, state.players})
+    end)
+
     {:noreply, %{state | game_state: :finished}}
   end
 

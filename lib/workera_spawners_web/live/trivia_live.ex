@@ -17,32 +17,36 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
 
   def render(assigns) do
     ~H"""
-    <%= case @game_state do %>
-      <% :awaiting_name -> %>
-        <%= form_for :name_form, "#", [phx_submit: :save_name], fn f -> %>
-          <%= text_input f, :name, placeholder: "Enter your name" %>
-          <%= submit "Submit" %>
-        <% end %>
-      <% :awaiting_players -> %>
-        <%= "Waiting for another player..." %>
-      <% :finished -> %>
-        <%= case @result do %>
-          <% :you_won -> %>
-            <%= "You won!" %>
-          <% :you_lost -> %>
-            <%= "You lost!" %>
-          <% :draw -> %>
-            <%= "It's a draw!" %>
-        <% end %>
-        <%= "Your score: #{@my_score}" %>
-        <%= "Opponent's score: #{@opp_score}" %>
-      <% _ -> %>
-        <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
-          <label><%= @question.text %></label>
-          <%= text_input f, :answer, placeholder: "Enter your answer" %>
-          <%= submit "Submit" %>
-        <% end %>
-    <% end %>
+    <div class="container">
+      <%= case @game_state do %>
+        <% :awaiting_name -> %>
+          <%= form_for :name_form, "#", [phx_submit: :save_name], fn f -> %>
+            <%= text_input f, :name, placeholder: "Enter your name" %>
+            <%= submit "Submit" %>
+          <% end %>
+        <% :awaiting_players -> %>
+          <%= "Waiting for another player..." %>
+        <% :awaiting_next_question -> %>
+          <%= "Nice job!" %>
+        <% :finished -> %>
+          <%= case @result do %>
+            <% :you_won -> %>
+              <%= "You won!" %>
+            <% :you_lost -> %>
+              <%= "You lost!" %>
+            <% :draw -> %>
+              <%= "It's a draw!" %>
+          <% end %>
+          <%= "Your score: #{@my_score}" %>
+          <%= "Opponent's score: #{@opp_score}" %>
+        <% _ -> %>
+          <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
+            <label><%= @question.text %></label>
+            <%= text_input f, :answer, placeholder: "Enter your answer" %>
+            <%= submit "Submit" %>
+          <% end %>
+      <% end %>
+    </div>
     """
   end
 
@@ -53,7 +57,7 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
 
   def handle_event("save_answer", %{"question_form" => %{"answer" => answer}}, socket) do
     GameServer.answer(answer)
-    {:noreply, socket}
+    {:noreply, assign(socket, %{game_state: :awaiting_next_question})}
   end
 
   def handle_info({:question, question}, socket) do

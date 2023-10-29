@@ -8,7 +8,7 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
       :ok,
       socket
       |> assign(
-      game_state: :awaiting_name,
+      game_state: GameServer.get_game_state(),
       name: nil,
       question: nil
       )
@@ -18,17 +18,19 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
   def render(assigns) do
     ~H"""
     <div class="container">
-      <%= case @game_state do %>
-        <% :awaiting_name -> %>
+      <%= case {@game_state, @name} do %>
+        <% {:awaiting_players, nil} -> %>
           <%= form_for :name_form, "#", [phx_submit: :save_name], fn f -> %>
             <%= text_input f, :name, placeholder: "Enter your name" %>
             <%= submit "Submit" %>
           <% end %>
-        <% :awaiting_players -> %>
-          <%= "Waiting for another player..." %>
-        <% :awaiting_next_question -> %>
+        <% {_, nil} -> %>
+          <p> Game going on, please wait </p>
+        <% {:awaiting_players, _name} -> %>
+          <p>Waiting for other players!</p>
+        <% {:awaiting_next_question, _name} -> %>
           <%= "Nice job!" %>
-        <% :finished -> %>
+        <% {:finished, _name} -> %>
           <%= case @result do %>
             <% :you_won -> %>
               <%= "You won!" %>
@@ -39,20 +41,41 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
           <% end %>
           <%= "Your score: #{@my_score}" %>
           <%= "Opponent's score: #{@opp_score}" %>
-        <% _ -> %>
-          <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
-            <label><%= @question.text %></label>
-            <%= text_input f, :answer, placeholder: "Enter your answer" %>
-            <%= submit "Submit" %>
-          <% end %>
-      <% end %>
+          <button phx-click="restart">Restart</button>
+        <% {:awaiting_answers, _name} -> %>
+          <%= case @question do %>
+            <% nil -> %>
+              <p>Waiting for question!</p>
+            <% _ -> %>
+              <%= form_for :question_form, "#", [phx_submit: :save_answer], fn f -> %>
+                <label><%= @question.text %></label>
+                <%= text_input f, :answer, placeholder: "Enter your answer" %>
+                <%= submit "Submit" %>
+              <% end %>
+            <% end %>
+        <% end %>
     </div>
     """
   end
 
   def handle_event("save_name", %{"name_form" => %{"name" => name}}, socket) do
-    GameServer.add_player(name)
-    {:noreply, assign(socket, %{name: name, game_state: :awaiting_players})}
+    case GameServer.add_player(name) do
+      :ok ->
+        {:noreply, assign(socket, game_state: GameServer.get_game_state(), name: name)}
+      _else ->
+        {:noreply, assign(socket, game_state: GameServer.get_game_state())}
+    end
+  end
+
+  def handle_event("restart", _params, socket) do
+    GameServer.restart()
+    {:noreply, assign(socket,
+      %{
+        game_state: GameServer.get_game_state(),
+        name: nil,
+        question: nil
+      })
+    }
   end
 
   def handle_event("save_answer", %{"question_form" => %{"answer" => answer}}, socket) do
@@ -61,6 +84,7 @@ defmodule WorkeraSpawnersWeb.TriviaLive do
   end
 
   def handle_info({:question, question}, socket) do
+    IO.inspect(question)
     {:noreply, assign(socket, %{question: question, game_state: :awaiting_answers})}
   end
 
